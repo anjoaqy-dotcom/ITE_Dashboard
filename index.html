@@ -1,0 +1,1511 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Registered Infant Deaths in the Philippines, 2015 to 2023</title>
+<meta name="description" content="PSA OpenStat Table 9.8 dashboard — Registered infant deaths by usual residence and region, 2015–2023" />
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================================
+   DESIGN SYSTEM — Infant Deaths Dashboard (Editorial)
+   ============================================================================ */
+:root {
+  --radius: 16px;
+  --gap: 24px;
+  --gap-sm: 16px;
+  --gap-lg: 32px;
+
+  --bg: #FAF7F2;
+  --surface: #FFFFFF;
+  --surface-2: #F7F3E9;
+  --border-color: #ECE6DB;
+  --ink: #1F3D2B;
+  --ink-soft: #5B6B61;
+  --muted: #6B7280;
+  --text-body: #33414D;
+
+  --color-up: #D1495B;
+  --color-down: #3A7CA5;
+  --color-neutral: #94A3B8;
+
+  --shadow-layer1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-layer2: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="dark"] {
+  --bg: #0F1A14;
+  --surface: #16251D;
+  --surface-2: #1E3228;
+  --border-color: #2A3E2F;
+  --ink: #E8EFE6;
+  --ink-soft: #A9B8A8;
+  --muted: #8A9A8A;
+  --text-body: #D8E0D2;
+
+  --color-up: #E87A89;
+  --color-down: #6FA8C8;
+  --color-neutral: #6B7A82;
+
+  --shadow-layer1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-layer2: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text-body);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+  transition: background 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+  min-height: 100vh;
+  font-size: 16px;
+  animation: pageFadeIn 0.6s ease-out;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 2% 8%, rgba(31, 61, 43, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 98% 92%, rgba(31, 61, 43, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+html[data-theme="dark"] body::before {
+  background-image:
+    radial-gradient(circle at 2% 8%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 98% 92%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+}
+
+h1, h2, h3, .display-serif {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* ============================================================================
+   LAYOUT
+   ============================================================================ */
+.section {
+  padding: 48px 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+@media (min-width: 640px) { .section { padding: 64px 24px; } }
+@media (min-width: 1024px) { .section { padding: 80px 32px; } }
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.section-title {
+  font-size: clamp(28px, 5vw, 40px);
+  color: var(--ink);
+  margin: 0 0 8px 0;
+  line-height: 1.15;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 2px;
+  background: var(--ink);
+  margin-top: 10px;
+}
+
+.section-subtitle {
+  color: var(--ink-soft);
+  font-size: 16px;
+  max-width: 72ch;
+  margin: 0 0 32px 0;
+  line-height: 1.7;
+}
+
+/* ============================================================================
+   CARDS
+   ============================================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-layer1), var(--shadow-layer2);
+  padding: 24px;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform, box-shadow;
+}
+html[data-theme="dark"] .card {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.5);
+  border-color: var(--border-color);
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.08);
+  border-color: var(--ink-soft);
+}
+html[data-theme="dark"] .card:hover {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 12px 32px rgba(0,0,0,0.6);
+}
+
+.chart-card {
+  position: relative;
+  min-height: 320px;
+  width: 100%;
+}
+@media (min-width: 768px) { .chart-card { height: auto; } }
+
+.chart-wrap {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Heatmap table cell sizing */
+.heatmap-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.heatmap-table th,
+.heatmap-table td {
+  min-width: 56px;
+  width: 56px;
+  height: 40px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  padding: 0;
+}
+.heatmap-table th {
+  height: 40px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+}
+.heatmap-table td {
+  font-size: 12px;
+  font-weight: 600;
+}
+.heatmap-table td:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  font-weight: 700;
+  padding-right: 12px;
+  border-right: 2px solid var(--border-color);
+  z-index: 2;
+}
+
+/* ============================================================================
+   STICKY NAV BAR
+   ============================================================================ */
+.control-bar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-color);
+  padding: 14px 20px;
+  box-shadow: var(--shadow-layer1);
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+html[data-theme="dark"] .control-bar { box-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: start;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+  flex: 1;
+}
+.control-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+select {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  width: 100%;
+  min-width: 140px;
+  flex: 1;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235B6B61' d='M6 8.25l-1.5-1.5 1.5-1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+select:focus { outline: 2px solid var(--color-up); outline-offset: 2px; }
+
+.section-nav {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  white-space: nowrap;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+.nav-link:hover { border-color: var(--ink-soft); background: var(--surface-2); }
+.nav-link.active {
+  background: var(--ink);
+  color: #FFFFFF;
+  border-color: var(--ink);
+}
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #E0A030;
+  border-radius: 4px 0 0 4px;
+}
+.nav-link .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dark-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.dark-toggle:hover { background: var(--surface-2); }
+
+/* ============================================================================
+   HERO
+   ============================================================================ */
+.hero {
+  padding: 56px 20px 0;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+@media (min-width: 768px) { .hero { padding: 80px 24px 0; } }
+
+.hero-title {
+  font-size: clamp(40px, 7vw, 64px);
+  line-height: 1.05;
+  margin: 0 0 12px 0;
+  color: var(--ink);
+}
+.hero-sub {
+  color: var(--ink-soft);
+  font-size: 17px;
+  max-width: 80ch;
+  line-height: 1.7;
+  margin: 0 0 32px 0;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-sm);
+  margin-bottom: 48px;
+}
+@media (min-width: 640px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform, box-shadow;
+}
+html[data-theme="dark"] .kpi-card {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.5);
+  border-color: var(--border-color);
+}
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.08);
+  border-color: var(--ink-soft);
+}
+html[data-theme="dark"] .kpi-card:hover {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 12px 32px rgba(0,0,0,0.6);
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: block;
+}
+.kpi-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(28px, 6vw, 40px);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.kpi-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 6px;
+  display: block;
+}
+
+.kpi-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid;
+  margin-top: 6px;
+}
+.kpi-chip.up { color: var(--color-down); background: rgba(58, 124, 165, 0.10); border-color: rgba(58, 124, 165, 0.20); }
+.kpi-chip.down { color: var(--color-up); background: rgba(209, 73, 91, 0.10); border-color: rgba(209, 73, 91, 0.20); }
+
+/* ============================================================================
+   BENTO GRID
+   ============================================================================ */
+.bento-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap);
+}
+@media (min-width: 768px) { .bento-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) {
+  .bento-grid { grid-template-columns: repeat(12, 1fr); }
+  .bento-span-8 { grid-column: span 8; }
+  .bento-span-4 { grid-column: span 4; }
+}
+
+/* ============================================================================
+   BUTTONS & PILLS
+   ============================================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn:hover { background: var(--surface-2); border-color: var(--ink-soft); }
+.btn-primary {
+  background: var(--ink);
+  color: #FFFFFF;
+  border-color: var(--ink);
+}
+.btn-primary:hover { background: #2E5941; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+.pill:hover { border-color: var(--ink-soft); background: var(--surface-2); }
+.pill.active {
+  background: var(--ink);
+  color: #FFFFFF;
+  border-color: var(--ink);
+}
+.pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ============================================================================
+   TABLES
+   ============================================================================ */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  margin-top: 16px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+th {
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border-color);
+}
+td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-body); }
+tr:hover td { background: rgba(31, 61, 43, 0.04); }
+html[data-theme="dark"] tr:hover td { background: rgba(255, 255, 255, 0.03); }
+tr:last-child td { border-bottom: none; }
+
+/* ============================================================================
+   CHIPS & BADGES
+   ============================================================================ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid;
+}
+.chip-up { color: var(--color-down); background: rgba(58, 124, 165, 0.10); border-color: rgba(58, 124, 165, 0.20); }
+.chip-down { color: var(--color-up); background: rgba(209, 73, 91, 0.10); border-color: rgba(209, 73, 91, 0.20); }
+.chip-neutral { color: var(--muted); background: var(--surface-2); border-color: var(--border-color); }
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+}
+.rank-badge.top-3 { background: #E0A030; color: #FFFFFF; border-color: #E0A030; }
+
+.status-ok { color: #5FA55A; font-weight: 600; }
+.status-bad { color: var(--color-up); font-weight: 600; }
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+footer {
+  border-top: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--ink);
+  margin-top: 64px;
+}
+footer .section {
+  padding-top: 48px;
+  padding-bottom: 64px;
+}
+
+/* ============================================================================
+   MOTION
+   ============================================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal > * {
+  opacity: 0;
+  animation: slideInUp 0.6s ease-out forwards;
+}
+.reveal.visible > * {
+  opacity: 1;
+}
+.reveal.visible > *:nth-child(1) { animation-delay: 0.06s; }
+.reveal.visible > *:nth-child(2) { animation-delay: 0.12s; }
+.reveal.visible > *:nth-child(3) { animation-delay: 0.18s; }
+.reveal.visible > *:nth-child(4) { animation-delay: 0.24s; }
+.reveal.visible > *:nth-child(5) { animation-delay: 0.30s; }
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes growBar {
+  from { width: 0%; }
+  to { width: var(--target-width); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border-color) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+  height: 1em;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal > * {
+    opacity: 1;
+    animation: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Sticky Control Bar -->
+<div class="control-bar">
+  <div class="control-row">
+    <div class="control-group" style="flex: 0 0 auto;">
+      <div style="font-family:'DM Serif Display',serif; font-size:18px; font-weight:400; color:var(--ink);">PSA Table 9.8</div>
+    </div>
+    <div class="section-nav" id="section-nav"></div>
+    <div class="control-group">
+      <div class="control-label">From Year</div>
+      <select id="from-year"></select>
+    </div>
+    <div class="control-group">
+      <div class="control-label">To Year</div>
+      <select id="to-year"></select>
+    </div>
+    <div class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode">🌓 Dark mode</div>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <h1 class="hero-title">Registered Infant Deaths in the Philippines, 2015 to 2023</h1>
+  
+
+  <div class="kpi-grid" id="kpi-grid">
+    <!-- KPI cards injected by JS -->
+  </div>
+</div>
+
+<!-- Main Content -->
+<main id="main-content">
+
+  <!-- Q1 -->
+  <section id="q1" class="section reveal">
+    <div class="section-tag">Q1 · National Trend</div>
+    <h2 class="section-title">How many infant deaths are registered each year?</h2>
+    <p class="section-subtitle">Each point is one year. Lower means fewer deaths. Use the From and To boxes to compare any two years.</p>
+    <div class="bento-grid">
+      <div class="card chart-card bento-span-8">
+        <div class="chart-wrap">
+          <canvas id="chart-q1" role="img" aria-label="National registered infant deaths line chart, 2015 to 2023"></canvas>
+        </div>
+      </div>
+      <div class="card bento-span-4">
+        <div class="control-row" style="flex-wrap:wrap;">
+          <div class="control-group">
+            <div class="control-label">From Year</div>
+            <select id="q1-from"></select>
+          </div>
+          <div class="control-group">
+            <div class="control-label">To Year</div>
+            <select id="q1-to"></select>
+          </div>
+        </div>
+        <div class="mt-6">
+          <h3 style="font-size:17px; color:var(--ink); margin-bottom:12px;">Year-to-Year Comparison</h3>
+          <div id="q1-comparison" class="text-sm space-y-2">
+            <!-- injected -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap mt-8">
+      <table>
+        <thead><tr>
+          <th>Year</th>
+          <th class="tabular-nums">Registered Deaths</th>
+          <th class="tabular-nums">Change vs Previous</th>
+          <th class="tabular-nums">% Change</th>
+        </tr></thead>
+        <tbody id="q1-table"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Q2 -->
+  <section id="q2" class="section reveal">
+    <div class="section-tag">Q2 · Regional Ranking</div>
+    <h2 class="section-title">Which regions have the most deaths?</h2>
+    <p class="section-subtitle">The longest bar has the most deaths. The percent is that region's share of all deaths in the country. Pick a year and a focus region.</p>
+    <div class="bento-grid">
+      <div class="card chart-card bento-span-8">
+        <div class="chart-wrap">
+          <canvas id="chart-q2" role="img" aria-label="Top 10 regions horizontal bar chart"></canvas>
+        </div>
+      </div>
+      <div class="card bento-span-4">
+        <div class="control-row" style="flex-wrap:wrap;">
+          <div class="control-group">
+            <div class="control-label">Year</div>
+            <select id="q2-year"></select>
+          </div>
+          <div class="control-group">
+            <div class="control-label">Focus Region</div>
+            <select id="q2-focus"></select>
+          </div>
+        </div>
+        <div style="background:var(--surface-2);border:1px solid var(--border-color);border-radius:12px;padding:16px;margin-top:16px;">
+          <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted);margin-bottom:8px;">Focus region rank</p>
+          <div id="q2-rank-text" class="text-3xl font-bold tabular-nums" style="color:var(--ink)">—</div>
+          <p id="q2-rank-sub" class="text-sm" style="color:var(--muted);margin-top:6px;"></p>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap mt-8">
+      <table>
+        <thead><tr>
+          <th>Rank</th>
+          <th>Region</th>
+          <th class="tabular-nums">Deaths</th>
+          <th class="tabular-nums">Share of National</th>
+          <th>Focus</th>
+        </tr></thead>
+        <tbody id="q2-table"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Q3 -->
+  <section id="q3" class="section reveal">
+    <div class="section-tag">Q3 · Long-term Change</div>
+    <h2 class="section-title">Which regions went up or down since 2015?</h2>
+    <p class="section-subtitle">Blue bars to the left mean fewer deaths in 2023 than in 2015. Red bars to the right mean more.</p>
+    <div class="card chart-card">
+      <div class="chart-wrap">
+        <canvas id="chart-q3" role="img" aria-label="Percent change in registered infant deaths, 2015 to 2023, diverging bar chart"></canvas>
+      </div>
+    </div>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <span class="flex items-center gap-1 text-xs" style="color:var(--muted)"><span class="w-3 h-2 rounded" style="background:#D1495B"></span> Increase</span>
+      <span class="flex items-center gap-1 text-xs" style="color:var(--muted)"><span class="w-3 h-2 rounded" style="background:#2A9D8F"></span> Decrease</span>
+    </div>
+  </section>
+
+  <!-- Q4 -->
+  <section id="q4" class="section reveal">
+    <div class="section-tag">Q4 · Regional Share Distribution</div>
+    <h2 class="section-title">Which regions make up most of the national total?</h2>
+    <p class="section-subtitle">Each column is one year. A bigger block means a bigger share of that year's deaths. "Other regions" includes the remaining regions and the Foreign Countries row.</p>
+    <div class="card chart-card bento-span-8" style="min-height: 340px;">
+      <div class="chart-wrap" style="height: 300px;">
+        <canvas id="chart-q4" role="img" aria-label="100% stacked bar chart, share of national registered infant deaths by region, 2015 to 2023" width="700" height="300"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Q5 -->
+  <section id="q5" class="section reveal">
+    <div class="section-tag">Q5 · Heatmap Recovery Matrix</div>
+    <h2 class="section-title">Which regions dropped in 2020, and did they recover?</h2>
+    <p class="section-subtitle">Each row is a region. Red means more deaths than in 2015 and blue means fewer. The number in each cell is the region's deaths as a percent of its own 2015 count, so 100 means the same as 2015.</p>
+    <div class="card">
+      <div class="overflow-x-auto" style="max-height: 520px;">
+        <table class="heatmap-table" id="heatmap-table"></table>
+      </div>
+    </div>
+    <div class="mt-4 flex flex-wrap gap-3 text-sm" style="color:var(--muted)">
+      <span class="flex items-center gap-1"><span class="w-3 h-2" style="background:linear-gradient(to right,#D1495B,#FFFFFF,#2A9D8F)"></span> Diverging scale: red = increase above 100, blue = decrease below 100</span>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="section">
+    <div class="flex flex-wrap justify-between items-center gap-16" style="align-items:flex-start;">
+      <div>
+        <button id="toggle-table" class="btn" style="padding:8px 16px;font-size:13px;">Show Raw Data</button>
+      </div>
+      <div class="flex gap-12">
+        <button id="download-csv" class="btn btn-primary">Download CSV</button>
+        <a href="#" class="btn">Source: PSA OpenStat</a>
+      </div>
+    </div>
+
+    <div id="raw-table-wrap" style="display:none;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Region</th><th class="tabular-nums">2015</th><th class="tabular-nums">2016</th><th class="tabular-nums">2017</th><th class="tabular-nums">2018</th><th class="tabular-nums">2019</th><th class="tabular-nums">2020</th><th class="tabular-nums">2021</th><th class="tabular-nums">2022</th><th class="tabular-nums">2023</th></tr></thead>
+          <tbody id="raw-table"></tbody>
+        </table>
+      </div>
+      <p style="color:var(--muted); font-size:12px; margin-top:6px;">Null cells indicate missing source entries ("…") and are not treated as zero.</p>
+    </div>
+
+</div>
+</footer>
+
+<script>
+/* ============================================================================
+   DATA — PSA Table 9.8, 2015–2023 (embedded)
+   ============================================================================ */
+const YEARS = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+
+const RAW = {
+  Philippines: [20750, 21874, 20311, 21019, 21723, 16885, 18607, 20072, 21593],
+  NCR: [3811, 3687, 3357, 3495, 3899, 2859, 2839, 2780, 3011],
+  CAR: [257, 250, 205, 254, 246, 210, 245, 237, 275],
+  I: [1169, 1205, 1136, 1213, 1157, 986, 1040, 1094, 1264],
+  II: [581, 604, 590, 627, 577, 425, 507, 531, 564],
+  III: [2368, 2480, 2314, 2455, 2656, 1996, 2259, 2529, 2808],
+  'IV-A': [3657, 3727, 3546, 3698, 3948, 3000, 3232, 3350, 3622],
+  MIMAROPA: [675, 693, 653, 661, 699, 487, 495, 607, 660],
+  V: [1311, 1517, 1364, 1550, 1325, 1015, 1235, 1437, 1450],
+  VI: [1365, 1383, 1321, 1268, 1251, 983, 1091, 1283, 1363],
+  VII: [1588, 1828, 1632, 1540, 1649, 1376, 1514, 1569, 1542],
+  VIII: [563, 682, 547, 603, 580, 445, 507, 614, 562],
+  IX: [529, 594, 483, 508, 537, 412, 467, 583, 679],
+  X: [806, 1000, 959, 933, 908, 824, 952, 1015, 1145],
+  XI: [892, 1000, 988, 1073, 1110, 871, 994, 1107, 1222],
+  XII: [637, 666, 630, 592, 633, 497, 602, 671, 732],
+  Caraga: [344, 345, 386, 370, 410, 349, 405, 495, 506],
+  BARMM: [196, 209, 193, 178, 134, 150, 223, 167, 187],
+  'Foreign Countries': [1, 4, null, null, 4, null, null, 3, 1],
+};
+
+const REGION_LABELS = {
+  Philippines: 'Philippines (National Total)',
+  NCR: 'National Capital Region (NCR)',
+  CAR: 'Cordillera Administrative Region (CAR)',
+  I: 'Region I (Ilocos Region)',
+  II: 'Region II (Cagayan Valley)',
+  III: 'Region III (Central Luzon)',
+  'IV-A': 'Region IV-A (CALABARZON)',
+  MIMAROPA: 'Region IV-B (MIMAROPA)',
+  V: 'Region V (Bicol Region)',
+  VI: 'Region VI (Western Visayas)',
+  VII: 'Region VII (Central Visayas)',
+  VIII: 'Region VIII (Eastern Visayas)',
+  IX: 'Region IX (Zamboanga Peninsula)',
+  X: 'Region X (Northern Mindanao)',
+  XI: 'Region XI (Davao Region)',
+  XII: 'Region XII (SOCCSKSARGEN)',
+  Caraga: 'Region XIII (Caraga)',
+  BARMM: 'BARMM (Bangsamoro Autonomous Region in Muslim Mindanao)',
+  'Foreign Countries': 'Foreign Countries',
+};
+
+const REGIONS_10 = ['IV-A','NCR','III','VII','V','VI','I','XI','X','XII'];
+
+/* ============================================================================
+   UTILITIES
+   ============================================================================ */
+function get(region, year) {
+  const y = Number(year);
+  const idx = YEARS.indexOf(y);
+  if (idx === -1) return null;
+  const arr = RAW[region];
+  if (!arr) return null;
+  return arr[idx] != null ? arr[idx] : null;
+}
+
+function pctChange(oldV, newV) {
+  if (oldV == null || newV == null || oldV === 0) return null;
+  return ((newV - oldV) / oldV) * 100;
+}
+
+function absDiff(newV, oldV) {
+  if (newV == null || oldV == null) return null;
+  return newV - oldV;
+}
+
+function fmt(n) {
+  return n == null ? '—' : n.toLocaleString();
+}
+function fmtPct(n) {
+  return n == null ? '—' : n.toFixed(1) + '%';
+}
+function sign(n) {
+  return n > 0 ? '+' : '';
+}
+
+function rankRegion(regionKey, year) {
+  const scored = REGIONS_10.map(r => ({ key: r, value: get(r, year) }))
+    .filter(e => e.value != null)
+    .sort((a, b) => b.value - a.value);
+  const idx = scored.findIndex(e => e.key === regionKey);
+  return idx === -1 ? null : idx + 1;
+}
+
+function topRegions(year, n = 10) {
+  return REGIONS_10.map(r => ({ key: r, label: REGION_LABELS[r], value: get(r, year) }))
+    .filter(e => e.value != null)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, n);
+}
+
+function pctShare(regionKey, year) {
+  const val = get(regionKey, year);
+  const national = get('Philippines', year);
+  if (val == null || national == null || national === 0) return null;
+  return (val / national) * 100;
+}
+
+function indexTo2015(regionKey, year) {
+  const val = get(regionKey, year);
+  const base = get(regionKey, 2015);
+  if (val == null || base == null || base === 0) return null;
+  return (val / base) * 100;
+}
+
+/* ============================================================================
+   CHART HELPERS
+   ============================================================================ */
+const charts = {};
+function destroyChart(key) {
+  if (charts[key]) { charts[key].destroy(); charts[key] = null; }
+}
+function toRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+function varCss(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function regionColor(key) {
+  const m = {
+    NCR: '#E0A030', CAR: '#5FA55A', I: '#2A9D8F', II: '#8E5BA8', III: '#D1495B',
+    'IV-A': '#E0A030', MIMAROPA: '#5FA55A', V: '#2A9D8F', VI: '#8E5BA8', VII: '#D1495B',
+    VIII: '#E0A030', IX: '#5FA55A', X: '#2A9D8F', XI: '#8E5BA8', XII: '#D1495B',
+    Caraga: '#E0A030', BARMM: '#5FA55A',
+  };
+  return m[key] || '#6B7280';
+}
+
+/* ============================================================================
+   HERO KPIs
+   ============================================================================ */
+function renderKPIs() {
+  const n23 = get('Philippines', 2023);
+  const n15 = get('Philippines', 2015);
+  const n19 = get('Philippines', 2019);
+  const n20 = get('Philippines', 2020);
+
+  const c15to23 = pctChange(n23, n15);
+  const d15to23 = absDiff(n23, n15);
+  const c19to20 = pctChange(n20, n19);
+  const d19to20 = absDiff(n20, n19);
+  const c20to23 = pctChange(n23, n20);
+  const d20to23 = absDiff(n23, n20);
+
+  const grid = document.getElementById('kpi-grid');
+  grid.innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-label">National deaths, 2023</div>
+      <div class="kpi-value tabular-nums">${fmt(n23)}</div>
+      <div class="kpi-sub">Registered infant deaths, latest year</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Change vs 2015 baseline</div>
+      <div class="kpi-value tabular-nums">${sign(c15to23)}${fmtPct(c15to23)}</div>
+      <div class="kpi-sub">${fmt(n15)} in 2015 &middot; ${sign(d15to23)}${fmt(d15to23)} deaths</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">2019 &rarr; 2020 pandemic shift</div>
+      <div class="kpi-value tabular-nums">${sign(c19to20)}${fmtPct(c19to20)}</div>
+      <div class="kpi-sub">${sign(d19to20)}${fmt(d19to20)} deaths</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">2020 &rarr; 2023 recovery</div>
+      <div class="kpi-value tabular-nums">${sign(c20to23)}${fmtPct(c20to23)}</div>
+      <div class="kpi-sub">${sign(d20to23)}${fmt(d20to23)} deaths</div>
+    </div>
+  `;
+}
+
+/* ============================================================================
+   Q1 — National Trend
+   ============================================================================ */
+function renderQ1() {
+  const fromSel = document.getElementById('q1-from');
+  const toSel = document.getElementById('q1-to');
+  fromSel.innerHTML = YEARS.map(y => `<option value="${y}" ${y===2015?'selected':''}>${y}</option>`).join('');
+  toSel.innerHTML = YEARS.map(y => `<option value="${y}" ${y===2023?'selected':''}>${y}</option>`).join('');
+
+  const series = YEARS.map(y => ({ x: y, y: get('Philippines', y) }));
+
+  destroyChart('q1');
+  const ctx = document.getElementById('chart-q1').getContext('2d');
+  charts.q1 = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'Philippines',
+        data: series,
+        borderColor: '#1F3D2B',
+        backgroundColor: 'rgba(31, 61, 43, 0.10)',
+        borderWidth: 3,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.3,
+        pointBackgroundColor: '#1F3D2B',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          titleColor: varCss('--ink'),
+          bodyColor: varCss('--text-body'),
+          padding: 12,
+          cornerRadius: 10,
+          callbacks: {
+            title: ctx => `Year ${ctx[0].label}`,
+            label: ctx => ctx.parsed.y == null ? 'No data' : ctx.parsed.y.toLocaleString() + ' deaths',
+          }
+        }
+      },
+      scales: {
+        x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Year', color: varCss('--ink-soft') }, ticks: { stepSize: 1, color: varCss('--muted') }, grid: { color: varCss('--border-color') } },
+        y: { beginAtZero: true, title: { display: true, text: 'Registered infant deaths', color: varCss('--ink-soft') }, ticks: { color: varCss('--muted'), callback: v => v.toLocaleString() }, grid: { color: varCss('--border-color') } },
+      },
+      animation: { duration: 900, easing: 'easeOutQuart' },
+    }
+  });
+
+  updateQ1Comparison(fromSel.value, toSel.value);
+}
+
+function updateQ1Comparison(fromY, toY) {
+  const fromYi = Number(fromY);
+  const toYi = Number(toY);
+  const fromVal = get('Philippines', fromYi);
+  const toVal = get('Philippines', toYi);
+  const chg = pctChange(toVal, fromVal);
+  const diff = absDiff(toVal, fromVal);
+
+  const comp = document.getElementById('q1-comparison');
+  if (fromYi === toYi) {
+    comp.innerHTML = '<p style="color:var(--muted);font-size:14px;">Pick two different years to see the change.</p>';
+  } else {
+    comp.innerHTML = `
+      <div style="display:flex; flex-wrap:wrap; gap:12px;">
+        <div style="flex:1; min-width:140px; background:var(--surface-2); border:1px solid var(--border-color); border-radius:10px; padding:14px;">
+          <div class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">From ${fromYi}</div>
+          <div class="text-lg font-bold tabular-nums" style="color:var(--ink)">${fmt(fromVal)}</div>
+        </div>
+        <div style="flex:1; min-width:140px; background:var(--surface-2); border:1px solid var(--border-color); border-radius:10px; padding:14px;">
+          <div class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">To ${toYi}</div>
+          <div class="text-lg font-bold tabular-nums" style="color:var(--ink)">${fmt(toVal)}</div>
+        </div>
+        <div style="flex:1; min-width:140px; background:var(--surface-2); border:1px solid var(--border-color); border-radius:10px; padding:14px;">
+          <div class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Change</div>
+          <div class="text-lg font-bold tabular-nums" style="color:${chg!=null&&chg<0?'#5FA55A':'#D1495B'}">${sign(chg)}${fmtPct(chg)}</div>
+          <div class="text-xs" style="color:var(--muted);margin-top:4px;">${sign(diff)}${fmt(diff)} deaths</div>
+        </div>
+      </div>
+    `;
+  }
+
+  const tbody = document.getElementById('q1-table');
+  tbody.innerHTML = '';
+  let prev = null;
+  YEARS.forEach((y, i) => {
+    const v = get('Philippines', y);
+    const showRow = y >= fromYi && y <= toYi;
+    if (!showRow) return;
+    const pct = pctChange(prev, v);
+    const d = absDiff(v, prev);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="font-medium">${y}</td>
+      <td class="tabular-nums">${fmt(v)}</td>
+      <td class="tabular-nums">${d==null?'—':sign(d)+fmt(d)}</td>
+      <td class="tabular-nums">${pct==null?'—':sign(pct)+pct.toFixed(1)+'%'}</td>
+    `;
+    tbody.appendChild(row);
+    prev = v;
+  });
+}
+
+/* ============================================================================
+   Q2 — Regional Ranking
+   ============================================================================ */
+function renderQ2() {
+  const yearSel = document.getElementById('q2-year');
+  const focusSel = document.getElementById('q2-focus');
+  yearSel.innerHTML = YEARS.map(y => `<option value="${y}" ${y===2023?'selected':''}>${y}</option>`).join('');
+  focusSel.innerHTML = '';
+  REGIONS_10.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r;
+    o.textContent = REGION_LABELS[r];
+    if (r === 'NCR') o.selected = true;
+    focusSel.appendChild(o);
+  });
+
+  drawQ2(document.getElementById('q2-year').value, document.getElementById('q2-focus').value);
+}
+
+function drawQ2(year, focusKey) {
+  const y = Number(year);
+  const all = REGIONS_10.map(r => ({
+    key: r,
+    label: REGION_LABELS[r],
+    value: get(r, y) || 0
+  })).sort((a, b) => b.value - a.value);
+
+  let display = all.slice(0, 10);
+
+  if (focusKey && !display.some(t => t.key === focusKey)) {
+    const focusEntry = all.find(t => t.key === focusKey);
+    if (focusEntry) {
+      display.pop();
+      display.push(focusEntry);
+      display.sort((a, b) => b.value - a.value);
+    }
+  }
+
+  const national = get('Philippines', y) || 1;
+  const focusRank = rankRegion(focusKey, y);
+  const focusVal = get(focusKey, y);
+  const focusShare = pctShare(focusKey, y);
+
+  destroyChart('q2');
+  const ctx = document.getElementById('chart-q2').getContext('2d');
+  charts.q2 = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: display.map(t => t.label).reverse(),
+      datasets: [{
+        label: 'Registered infant deaths',
+        data: display.map(t => t.value).reverse(),
+        backgroundColor: display.map(t => t.key === focusKey ? '#E0A030' : '#94A3B8').reverse(),
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => {
+              const t = display.find(x => x.label === c.label);
+              const s = pctShare(t.key, y);
+              return `${c.parsed.x.toLocaleString()} deaths (${s != null ? s.toFixed(1) : '—'}% of national)`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { beginAtZero: true, title: { display: true, text: 'Registered infant deaths', color: varCss('--ink-soft') }, ticks: { color: varCss('--muted'), callback: v => v.toLocaleString() }, grid: { color: varCss('--border-color') } },
+        y: { ticks: { color: varCss('--ink'), font: { weight: 600 } }, grid: { display: false } },
+      },
+      animation: { duration: 900, easing: 'easeOutQuart' },
+    }
+  });
+
+  document.getElementById('q2-rank-text').textContent = focusRank != null ? `#${focusRank}` : '—';
+  document.getElementById('q2-rank-sub').textContent = focusRank != null
+    ? `${focusKey} ranks #${focusRank} of 10 in ${y}: ${fmt(focusVal)} deaths, ${focusShare != null ? focusShare.toFixed(1) : '—'}% of national total.`
+    : 'No data for selected region.';
+
+  const tbody = document.getElementById('q2-table');
+  tbody.innerHTML = '';
+  display.forEach((t, i) => {
+    const isFocus = t.key === focusKey;
+    const share = pctShare(t.key, y);
+    const row = document.createElement('tr');
+    if (isFocus) row.style.backgroundColor = 'rgba(224, 160, 48, 0.10)';
+    row.innerHTML = `
+      <td class="font-medium">${i + 1}</td>
+      <td class="font-medium">${t.label}</td>
+      <td class="tabular-nums">${fmt(t.value)}</td>
+      <td class="tabular-nums">${share != null ? share.toFixed(1) + '%' : '—'}</td>
+      <td><span class="chip ${isFocus ? 'chip-up' : 'chip-neutral'}">${isFocus ? '● Focus' : '—'}</span></td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+/* ============================================================================
+   Q3 — Divergence
+   ============================================================================ */
+function renderQ3() {
+  const rows = REGIONS_10.map(r => {
+    const chg = pctChange(get(r, 2015), get(r, 2023));
+    return { key: r, label: REGION_LABELS[r], change: chg };
+  }).sort((a, b) => (b.change ?? -999) - (a.change ?? -999));
+
+  destroyChart('q3');
+  const ctx = document.getElementById('chart-q3').getContext('2d');
+  charts.q3 = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.label).reverse(),
+      datasets: [{
+        label: '% change 2015 to 2023',
+        data: rows.map(r => r.change).reverse(),
+        backgroundColor: rows.map(r => r.change == null ? '#CBD5E1' : r.change > 0 ? '#D1495B' : '#2A9D8F').reverse(),
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.parsed.x == null ? 'No data' : (ctx.parsed.x > 0 ? '+' : '') + ctx.parsed.x.toFixed(1) + '%',
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: '% change', color: varCss('--ink-soft') }, ticks: { color: varCss('--muted'), callback: v => (v > 0 ? '+' : '') + v.toFixed(1) + '%' }, grid: { color: varCss('--border-color') } },
+        y: { ticks: { color: varCss('--ink'), font: { weight: 600 } }, grid: { display: false } },
+      },
+      animation: { duration: 900, easing: 'easeOutQuart' },
+    }
+  });
+}
+
+/* ============================================================================
+   Q4 — Stacked Share
+   ============================================================================ */
+function renderQ4() {
+  const top5Keys = topRegions(2023, 5).map(t => t.key);
+  const allKeys = [...top5Keys, 'OTHER'];
+
+  const data = YEARS.map(year => {
+    const national = get('Philippines', year) || 1;
+    const top5Sum = top5Keys.reduce((sum, k) => sum + (get(k, year) || 0), 0);
+    const other = national - top5Sum;
+    return {
+      year,
+      ...Object.fromEntries(top5Keys.map(k => [k, (get(k, year) || 0) / national])),
+      OTHER: other / national,
+    };
+  });
+
+  const colors = {
+    NCR: '#E0A030', CAR: '#5FA55A', I: '#2A9D8F', II: '#8E5BA8', III: '#D1495B',
+    'IV-A': '#E0A030', MIMAROPA: '#5FA55A', V: '#2A9D8F', VI: '#8E5BA8', VII: '#D1495B',
+    VIII: '#E0A030', IX: '#5FA55A', X: '#2A9D8F', XI: '#8E5BA8', XII: '#D1495B',
+    OTHER: '#94A3B8',
+  };
+
+  destroyChart('q4');
+  const ctx = document.getElementById('chart-q4').getContext('2d');
+  charts.q4 = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.year),
+      datasets: allKeys.map((k, i) => ({
+        label: k === 'OTHER' ? 'Other regions' : REGION_LABELS[k],
+        data: data.map(d => d[k]),
+        backgroundColor: colors[k] || '#94A3B8',
+        stack: 'share',
+      })),
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: varCss('--ink-soft'), padding: 20, font: { size: 12 } } },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${(ctx.parsed.y * 100).toFixed(1)}%`,
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, title: { display: true, text: 'Year', color: varCss('--ink-soft') }, ticks: { color: varCss('--muted'), stepSize: 1 }, grid: { color: varCss('--border-color') } },
+        y: { stacked: true, min: 0, max: 1, title: { display: true, text: 'Share of national total', color: varCss('--ink-soft') }, ticks: { color: varCss('--muted'), callback: v => (v * 100).toFixed(0) + '%' }, grid: { color: varCss('--border-color') } },
+      },
+      animation: { duration: 900, easing: 'easeOutQuart' },
+    }
+  });
+}
+
+/* ============================================================================
+   Q5 — Heatmap
+   ============================================================================ */
+function renderQ5() {
+  const table = document.getElementById('heatmap-table');
+  const allRows = REGIONS_10.slice();
+  let thead = '<tr><th>Region</th>';
+  YEARS.forEach(y => thead += `<th>${y}</th>`);
+  thead += '</tr>';
+  table.innerHTML = thead + '<tbody></tbody>';
+  const tbody = table.querySelector('tbody');
+  table.className = 'heatmap-table';
+
+  allRows.forEach(r => {
+    const row = document.createElement('tr');
+    const labelCell = `<td style="font-weight:600;padding-right:12px;border-right:2px solid var(--border-color);">${REGION_LABELS[r]}</td>`;
+    let cells = labelCell;
+    YEARS.forEach(y => {
+      const idx = indexTo2015(r, y);
+      const bg = idx == null ? '#E5E7EB' : indexColor(idx);
+      const txt = idx == null ? '—' : Math.round(idx);
+      cells += `<td style="background:${bg};color:${document.documentElement.getAttribute('data-theme') === 'dark' ? '#D8E0D2' : '#374151'};font-size:12px;font-weight:600;text-align:center;" title="${REGION_LABELS[r]} · ${y}: ${txt} (2015=100)">${txt}</td>`;
+    });
+    row.innerHTML = cells;
+    tbody.appendChild(row);
+  });
+}
+
+function indexColor(idx) {
+  const d = idx - 100;
+  const t = Math.min(Math.abs(d) / 60, 1);
+  if (d > 0) {
+    const r = Math.round(220 - 40 * t);
+    const g = Math.round(38 - 10 * t);
+    const b = Math.round(38 - 10 * t);
+    return `rgba(${r},${g},${b},0.85)`;
+  }
+  const r = Math.round(30 - 5 * t);
+  const g = Math.round(80 + 20 * t);
+  const b = Math.round(200 - 20 * t);
+  return `rgba(${r},${g},${b},0.85)`;
+}
+
+/* ============================================================================
+   RAW DATA TABLE
+   ============================================================================ */
+function renderRawTable() {
+  const tbody = document.getElementById('raw-table');
+  tbody.innerHTML = '';
+  const rows = [...REGIONS_10, 'Philippines', 'Foreign Countries'];
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const isNat = r === 'Philippines';
+    if (isNat) tr.className = 'font-medium';
+    let html = `<td class="font-medium">${REGION_LABELS[r]}</td>`;
+    YEARS.forEach(y => {
+      const v = get(r, y);
+      html += `<td class="tabular-nums">${v == null ? '—' : v.toLocaleString()}</td>`;
+    });
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  });
+}
+
+function downloadCSV() {
+  let csv = 'Region,' + YEARS.join(',') + '\n';
+  const rows = [...REGIONS_10, 'Philippines', 'Foreign Countries'];
+  rows.forEach(r => {
+    csv += r + ',' + YEARS.map(y => {
+      const v = get(r, y);
+      return v == null ? '' : v;
+    }).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'infant-deaths-2015-2023.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================================
+   INIT & EVENTS
+   ============================================================================ */
+function renderAll() {
+  renderKPIs();
+}
+
+function init() {
+  [document.getElementById('from-year'), document.getElementById('to-year'), document.getElementById('q1-from'), document.getElementById('q1-to')].forEach(sel => {
+    sel.innerHTML = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
+  });
+  document.getElementById('to-year').value = 2023;
+  document.getElementById('q1-from').value = 2015;
+  document.getElementById('q1-to').value = 2023;
+
+  renderAll();
+  renderQ1();
+  renderQ2();
+  renderQ3();
+  renderQ4();
+  renderQ5();
+  renderRawTable();
+
+  document.getElementById('q1-from').addEventListener('change', e => updateQ1Comparison(e.target.value, document.getElementById('q1-to').value));
+  document.getElementById('q1-to').addEventListener('change', e => updateQ1Comparison(document.getElementById('q1-from').value, e.target.value));
+  document.getElementById('q2-year').addEventListener('change', e => drawQ2(e.target.value, document.getElementById('q2-focus').value));
+  document.getElementById('q2-focus').addEventListener('change', e => drawQ2(document.getElementById('q2-year').value, e.target.value));
+
+  document.getElementById('dark-toggle').addEventListener('click', () => {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+    localStorage.setItem('theme', dark ? 'light' : 'dark');
+  });
+  if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+  document.getElementById('toggle-table').addEventListener('click', () => {
+    const wrap = document.getElementById('raw-table-wrap');
+    const hidden = wrap.style.display === 'none';
+    wrap.style.display = hidden ? 'block' : 'none';
+    document.getElementById('toggle-table').textContent = hidden ? 'Hide Raw Data' : 'Show Raw Data';
+  });
+
+  document.getElementById('download-csv').addEventListener('click', downloadCSV);
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  const sections = ['q1','q2','q3','q4','q5'];
+  const navContainer = document.getElementById('section-nav');
+  sections.forEach((sec, i) => {
+    const a = document.createElement('a');
+    a.href = `#${sec}`;
+    a.className = 'nav-link' + (i === 0 ? ' active' : '');
+    a.innerHTML = `<span class="dot" style="background:${regionColor(REGIONS_10[i % REGIONS_10.length])}"></span>${sec.toUpperCase()}`;
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      a.classList.add('active');
+      document.getElementById(sec).scrollIntoView({ behavior: 'smooth' });
+    });
+    navContainer.appendChild(a);
+  });
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-100px 0px -50% 0px' });
+  sections.forEach(s => spy.observe(document.getElementById(s)));
+}
+
+init();
+</script>
+</body>
+</html>
